@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Adobe Logo Generator</title>
+  <meta name="author" content="Matheus Avellar">
+  <meta name="description" content="A simple generator for Adobe-like logos">
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <style>
+:root {
+  font-family: sans-serif;
+  font-size: 16px;
+}
+header,main,footer {
+  max-width: 600px;
+  margin: auto;
+}
+main {
+  padding: 1rem 0 5rem;
+}
+h1 {
+  font-family: myriad-pro-condensed, sans-serif;
+}
+h2 {
+  font-size: 1rem;
+  font-weight: bold;
+  text-align: left;
+}
+h1,h2,p {
+  margin: 0;
+}
+#product {
+  margin: 0.5rem 0 1rem;
+  font-size: 1.5rem;
+  font-family: myriad-pro-condensed, sans-serif;
+  text-align: center;
+}
+#gross-wrapper-wrapper {
+  text-align: center;
+}
+#logo-wrapper {
+  display: inline-block;
+}
+#logo {
+  font-family: myriad-pro-condensed, sans-serif;
+  font-weight: 700;
+  font-size: 14rem;
+  border: .9rem solid;
+  line-height: 20rem;
+  width: 20rem;
+  height: 20rem;
+  overflow: hidden;
+  text-align: center;
+  box-sizing: border-box;
+  color: var(--forecolor);
+  background-color: var(--backcolor);
+}
+#logo[data-rounded] {
+  border-radius: 4rem;
+}
+#logo > span {
+  display: inline-block;
+  transform: translateY(-2.25rem);
+}
+#word {
+  margin: 0;
+  padding: 0.25rem 0.25rem;
+}
+#colors {
+  margin: 1rem auto;
+  text-align: center;
+}
+#colors article {
+  vertical-align: middle;
+  display: inline-block;
+  border: 1px solid #eee;
+  padding: 1rem;
+  margin: 0.25rem 0.25rem;
+}
+#predef-wrapper article {
+  user-select: none;
+  cursor: pointer;
+}
+#predef-wrapper article:hover {
+  background-color: #eee;
+}
+#colors p {
+  font-size: 75%;
+}
+#colors .color {
+  width: 1rem;
+  height: 1rem;
+  display: inline-block;
+  border-radius: 2px;
+  background-color: var(--c);
+}
+#output-wrapper {
+  padding: 2rem;
+  text-align: center;
+}
+#output-wrapper:not(:empty)::before {
+  content: "Right-click the image below to save it! (on mobile, tap and hold)";
+  display: block;
+  margin-bottom: 2rem;
+}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Adobe Logo Generator</h1>
+  </header>
+  <main>
+    <!-- Due to a bug in dom-to-image, elements with margin sometimes generate
+    cropped images, so we need to center the logo's wrapper using a wrapper -->
+    <div id="gross-wrapper-wrapper">
+      <div id="logo-wrapper">
+        <div id="logo">
+          <span>Ps</span>
+        </div>
+      </div>
+    </div>
+    <p id="product">Adobe Photoshop</p>
+    <section>
+      <h2><label for="word">Product name:</label></h2>
+      <input id="word" type="text" placeholder="Photoshop">
+    </section>
+    <section id="colors">
+      <h2>Color scheme:</h2>
+      <div id="predef-wrapper">
+        <article>
+          <p>Photoshop</p>
+          <data data-colors="33c4f0,0d0925"></data>
+          <div class="color" style="--c:#33c4f0"></div>
+          <div class="color" style="--c:#0d0925"></div>
+        </article>
+        <article>
+          <p>Illustrator</p>
+          <data data-colors="ff7f18,1c0a00"></data>
+          <div class="color" style="--c:#ff7f18"></div>
+          <div class="color" style="--c:#1c0a00"></div>
+        </article>
+        <article>
+          <p>After Effects</p>
+          <data data-colors="d9a3ff,13002e"></data>
+          <div class="color" style="--c:#d9a3ff"></div>
+          <div class="color" style="--c:#13002e"></div>
+        </article>
+        <article>
+          <p>Premiere</p>
+          <data data-colors="ea77ff,2a0034"></data>
+          <div class="color" style="--c:#ea77ff"></div>
+          <div class="color" style="--c:#2a0034"></div>
+        </article>
+      </div>
+      <article id="custom">
+        <label for="picker">Custom</label>
+        <input id="picker" type="color">
+      </article>
+      <article>
+        <input id="rounded" type="checkbox">
+        <label for="rounded">Rounded edges</label>
+      </article>
+    </section>
+    <script>
+const product = document.getElementById("product");
+const logo = document.getElementById("logo");
+
+const word = document.getElementById("word");
+word.addEventListener("input", () => {
+  // If input is empty, default to 'Ps'
+  if(!word.value.length) {
+    setName("Photoshop");
+    return setLogo("Ps");
+  }
+
+  // Remove duplicate spaces
+  let text = word.value.trim().replace(/\s+/g," ");
+  // Upper case first character
+  const first_char = text[0].toUpperCase();
+  // Set product name
+  setName([first_char, text.substr(1)].join(""));
+
+  // Update text with upper case first character and lowercase rest
+  text = [first_char, text.substr(1).toLowerCase()].join("");
+
+  // Check for multiple words
+  const split_words = text.split(" ");
+  // If there's spaces and second word has any content
+  if(split_words.length > 1 && split_words[1].length)
+    // Set logo as first character of the first 2 words
+    return setLogo([first_char, split_words[1][0]].join(""));
+
+  // Otherwise, set logo as first 2 characters
+  return setLogo(text.substr(0,2));
+});
+
+function setName(text) {
+  product.textContent = `Adobe ${text}`;
+}
+function setLogo(text) {
+  logo.firstElementChild.textContent = text;
+}
+
+const rounded = document.getElementById("rounded");
+rounded.addEventListener("change", () => {
+  if(rounded.checked)
+    logo.setAttribute("data-rounded", "");
+  else
+    logo.removeAttribute("data-rounded");
+});
+
+const predefs = document.getElementById("predef-wrapper");
+[...predefs.children].forEach(e => {
+  e.addEventListener("click", () => {
+    const data = e.querySelector("data").getAttribute("data-colors").split(",");
+    logo.style.setProperty("--forecolor",`#${data[0]}`);
+    logo.style.setProperty("--backcolor",`#${data[1]}`);
+  });
+});
+logo.style.setProperty("--forecolor",`#33c4f0`);
+logo.style.setProperty("--backcolor",`#0d0925`);
+    </script>
+    <section>
+      <h2>Finish!</h2>
+      <button id="save-btn">Generate image</button>
+      <section id="output-wrapper"></section>
+    </section>
+    <script src="./chroma.min.js"></script>
+    <script>
+// Uses chroma.js
+const picker = document.getElementById("picker");
+picker.addEventListener("input", () => {
+  // Generates 100 colors stops from picked color and black,
+  // fetches 85th color from the start (85% of the way to black)
+  let color = chroma.scale([picker.value,"#000"]).colors(100)[85];
+  let contrast = chroma.contrast(picker.value,color);
+  if(contrast < 3) {
+    color = chroma.scale([picker.value,"#fff"]).colors(100)[85];
+    contrast = chroma.contrast(picker.value,color);
+  }
+  logo.style.setProperty("--forecolor", picker.value);
+  logo.style.setProperty("--backcolor", color);
+});
+    </script>
+    <script src="./dom-to-image.min.js"></script>
+    <script>
+// Uses dom-to-image.js
+const save = document.getElementById("save-btn");
+const logo_wrapper = document.getElementById("logo-wrapper");
+const output = document.getElementById("output-wrapper");
+
+save.addEventListener("click", () => {
+  while(output.firstElementChild)
+    output.firstElementChild.remove();
+
+  domtoimage.toPng(logo_wrapper)
+  .then(function (dataUrl) {
+    const img = new Image();
+    img.src = dataUrl;
+    output.appendChild(img);
+  })
+  .catch(function (error) {
+    console.error('oops, something went wrong!', error);
+  });
+});
+    </script>
+  </main>
+  <footer>
+    <p>
+      Made with <span id="love">love</span> by <a href="">Matheus Avellar</a>
+    </p>
+    <p>
+      Special thanks to Anatolii Saienko's <a href="https://github.com/tsayen/dom-to-image">dom-to-image</a>
+      and Gregor Aisch's <a href="https://github.com/gka/chroma.js">chroma.js</a>.
+    </p>
+  </footer>
+  <link rel="stylesheet" href="https://use.typekit.net/awt5pwy.css" crossorigin="anonymous">
+</body>
+</html>
